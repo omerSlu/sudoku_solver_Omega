@@ -113,22 +113,36 @@ namespace Sudoku
             //PrintOptionsMat(optionsMat);
             return optionsMat;
         }
-        static void UpdateOptions()
+        static void UpdateOptions(int[,,] optionsMat, int i, int j, int num)
         {
-
+            for(int k = 0; k < houseSize; k++)
+            {
+                optionsMat[i, j, k] = 0;
+                optionsMat[i, k, num-1] = 0;
+                optionsMat[k, j, num-1] = 0;
+                //optionsMat[(i + 1) / 3 + (k + 1) / 3, k % 3, num - 1] = 0;
+            }
         }
         static bool FillCell(int[,] board, int[,,] optionsMat, int i, int j, int num)
         {
+            if (board[i, j] != 0 && board[i, j] != num)
+                throw new Exception("not solvable two nakeds in same cell");
+            if (board[i, j] == num)
+                return true; 
+            board[i, j] = num;
+            PrintBoard(board);
+            UpdateOptions(optionsMat, i, j, num);
+
             return true;
         }
         static bool FillNaked(int[,,] optionsMat, int[,] board)//fills numbers that appear only once in the house
         {
-            int[] rowstemp = new int[houseSize];
-            int[] colstemp = new int[houseSize];
-            int[] squarestemp = new int[houseSize];
-            bool changed = true;
+            bool changed = false;
             for (int i = 0;i < houseSize;i++)
             {
+                int[] rowstemp = new int[houseSize];
+                int[] colstemp = new int[houseSize];
+                int[] squarestemp = new int[houseSize];
                 for (int j = 0; j < houseSize; j++)// all houses
                 {
                     //checks rows (only if empty cell)
@@ -159,11 +173,13 @@ namespace Sudoku
                             }
                         }
                     }
-                    if (optionsMat[(i + 1) / 3 + (j + 1) / 3, j % 3, houseSize] != -1)
+                    int row = (i + 1) / 3 + (j + 1) / 3, col = j % 3 + j / 3 * 3;// rows and cols to sacn a square
+                    if (optionsMat[row, col, houseSize] != -1)
                     {
+                        
                         for (int k = 0; k < houseSize; k++)
                         {
-                            if (optionsMat[(i + 1) / 3 + (j + 1) / 3, j % 3, k] != 0)
+                            if (optionsMat[row, col, k] != 0)
                                 if (squarestemp[k] > 0)
                                     squarestemp[k] = -1;
                                 else if (squarestemp[k] == 0)
@@ -174,24 +190,34 @@ namespace Sudoku
                 for (int k = 0; k < houseSize; k++)
                 {
                     if (rowstemp[k] > 0)
-                        changed = changed || FillCell(board, optionsMat, i, rowstemp[k] - 1, k + 1);
+                    {
+                        FillCell(board, optionsMat, i, rowstemp[k] - 1, k + 1);
+                        changed = true;
+                    }
                     else if (colstemp[k] > 0)
-                        changed = changed || FillCell(board, optionsMat, rowstemp[k], i - 1, k + 1);
-                    else if (squarestemp[k] > 0)
-                        changed = changed || FillCell(board, optionsMat, (i+1)/3 + (squarestemp[k]+1)/3, squarestemp[k] % 3, k + 1);
+                    {
+                        FillCell(board, optionsMat, colstemp[k] - 1, i, k + 1);
+                        changed = true;
+                    }
+                    //else if (squarestemp[k] > 0)
+                    //{
+                    //    FillCell(board, optionsMat, (i + 1) / 3 + (squarestemp[k] + 1) / 3, squarestemp[k] % 3 + (squarestemp[k] + 1) / 3 * 3, k + 1);
+                    //    changed = true;
+                    //}
                 }
             }
+            return changed;
         }
-        static int[,] Solve(int[,] board)
+        static int[,] Solve(int[,] board, int[,,] optionsMat)
         {
-            if(first)
+            if (IsSolved(board))
+                return board;
+            if (first)
             {
-                Scan(board);
+                optionsMat = Scan(board);
                 first = false;
             }
-            if(IsSolved(board))
-                return board;
-            FillNaked(optionsMat,board);
+            while (FillNaked(optionsMat,board));
             return board;
         }
         static void Main(string[] args)
@@ -201,7 +227,8 @@ namespace Sudoku
             string input = Console.ReadLine();
             houseSize = (int)Math.Sqrt(81);
             int[,] board = ToMat(input);
-            PrintBoard(Solve(board));
+            PrintBoard(board);
+            PrintBoard(Solve(board,null));
         }
     }
 }
