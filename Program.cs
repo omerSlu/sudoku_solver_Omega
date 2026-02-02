@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Xml.Schema;
 
 namespace Sudoku
 {
     public class Program
     {
+        static DateTime time;
+        static TimeSpan s;
         static int houseSize;
         static bool first = true;
         
@@ -26,7 +21,7 @@ namespace Sudoku
             }
             return mat;
         }
-        static void PrintBoard(int[,] board)
+        static void PrintBoard(int[,] board)// prints the board from a matrix
         {
             Console.WriteLine();
             for (int i = 0; i < houseSize; i++)
@@ -35,28 +30,43 @@ namespace Sudoku
                     Console.WriteLine("----------------------------");
                 for (int j = 0; j < houseSize; j++)
                 {
-                    Console.Write($" {board[i,j]} ");
+                    if (board[i, j] != 0)
+                        Console.Write($" {board[i, j]} ");
+                    else
+                        Console.Write(" . ");
                     if ((j + 1) % 3 == 0 && j != 8)
                         Console.Write("|");
                 }
                 Console.WriteLine();
             }
         }
-        static bool IsSolved(int[,] board)
+        static int SolveState(int[,,] optionsMat)//returns: -1 - not solvable 0 - solvable but not solved 1 - solved 
         {
+            int temp = 0;
+            bool notSolved = false;
             for (int i = 0; i < houseSize; i++)
             {
                 for (int j = 0; j < houseSize; j++)
                 {
-                    if (board[i, j] == 0)
-                        return false;
+                    if (optionsMat[i, j, houseSize] != -1)
+                    {
+                        for (int k = 0; k < houseSize; k++)
+                            if (optionsMat[i, k, houseSize] == 0)
+                                temp++;
+                        if (temp == 0)
+                            return -1;
+                        notSolved = true;
+                    }
+
                 }
             }
-            return true;
+            if (notSolved)
+                return 0;
+            return 1;
         }
-        static void TurnInToOptions(int[,] rows, int[,] cols, int[,] squares, int[,,] options, int[,] board)
+        static void TurnIntoOptions(int[,] rows, int[,] cols, int[,] squares, int[,,] options, int[,] board)
         {
-            int isHidden = 0;
+            int isNaked = 0;
             int temp = 0;
             int square = 0;
             for (int i = 0; i < houseSize; i++)
@@ -70,17 +80,17 @@ namespace Sudoku
                         {
                             if (rows[i, k] == 0 && cols[j, k] == 0 && squares[square, k] == 0)
                             {
-                                isHidden++;
+                                isNaked++;
                                 temp = k + 1;
                                 options[i, j, k]++;
                             }
 
                         }
-                        if (isHidden == 1)
+                        if (isNaked == 1)
                         {
                             options[i, j, houseSize] = temp;
                         }
-                            isHidden = 0;
+                        isNaked = 0;
                     }
                     else
                         options[i, j, houseSize] = -1;
@@ -109,18 +119,18 @@ namespace Sudoku
                     }
                 }
             }
-            TurnInToOptions(inRows, inCols, inSquares, optionsMat, board);
-            //PrintOptionsMat(optionsMat);
+            TurnIntoOptions(inRows, inCols, inSquares, optionsMat, board);
             return optionsMat;
         }
         static void UpdateOptions(int[,,] optionsMat, int i, int j, int num)
         {
+            optionsMat[i, j, houseSize] = -1;
             for(int k = 0; k < houseSize; k++)
             {
                 optionsMat[i, j, k] = 0;
                 optionsMat[i, k, num-1] = 0;
                 optionsMat[k, j, num-1] = 0;
-                //optionsMat[(i + 1) / 3 + (k + 1) / 3, k % 3, num - 1] = 0;
+                optionsMat[i / 3 * 3 + k / 3, k % 3 + j / 3 * 3, num - 1] = 0;
             }
         }
         static bool FillCell(int[,] board, int[,,] optionsMat, int i, int j, int num)
@@ -130,13 +140,13 @@ namespace Sudoku
             if (board[i, j] == num)
                 return true; 
             board[i, j] = num;
-            PrintBoard(board);
             UpdateOptions(optionsMat, i, j, num);
 
             return true;
         }
-        static bool FillNaked(int[,,] optionsMat, int[,] board)//fills numbers that appear only once in the house
+        static bool FillHidden(int[,,] optionsMat, int[,] board)//fills numbers that appear only once in the house
         {
+            
             bool changed = false;
             for (int i = 0;i < houseSize;i++)
             {
@@ -173,7 +183,7 @@ namespace Sudoku
                             }
                         }
                     }
-                    int row = (i + 1) / 3 + (j + 1) / 3, col = j % 3 + j / 3 * 3;// rows and cols to sacn a square
+                    int row = i / 3 * 3 + j / 3, col = j % 3 + i % 3 * 3;// rows and cols to sacn a square
                     if (optionsMat[row, col, houseSize] != -1)
                     {
                         
@@ -183,7 +193,7 @@ namespace Sudoku
                                 if (squarestemp[k] > 0)
                                     squarestemp[k] = -1;
                                 else if (squarestemp[k] == 0)
-                                    squarestemp[k] = j;
+                                    squarestemp[k] = j + 1;
                         }
                     }
                 }
@@ -194,30 +204,104 @@ namespace Sudoku
                         FillCell(board, optionsMat, i, rowstemp[k] - 1, k + 1);
                         changed = true;
                     }
-                    else if (colstemp[k] > 0)
+                    if (colstemp[k] > 0)
                     {
                         FillCell(board, optionsMat, colstemp[k] - 1, i, k + 1);
                         changed = true;
                     }
-                    //else if (squarestemp[k] > 0)
-                    //{
-                    //    FillCell(board, optionsMat, (i + 1) / 3 + (squarestemp[k] + 1) / 3, squarestemp[k] % 3 + (squarestemp[k] + 1) / 3 * 3, k + 1);
-                    //    changed = true;
-                    //}
+                    if (squarestemp[k] > 0)
+                    {
+                        FillCell(board, optionsMat, i / 3 * 3 + (squarestemp[k] - 1) / 3, (squarestemp[k] - 1) % 3 + i % 3 * 3, k + 1);
+                        changed = true;
+                    }
                 }
             }
             return changed;
         }
+        static bool FillNaked(int[,,] optionsMat, int[,] board)//checks if its the onlt possible number in the cell
+        {
+            bool changed = false;
+            int isNaked = 0;
+            int temp = 0;
+            if (first)
+            {
+                for (int i = 0; i < houseSize; i++)
+                    for (int j = 0; j < houseSize; j++)
+                        if (optionsMat[i, j, houseSize] > 0)
+                        {
+                            FillCell(board, optionsMat, i, j, optionsMat[i, j, houseSize]);
+                            changed = true;
+                        }
+                return changed;
+            }
+            for (int i = 0; i < houseSize; i++)
+                for (int j = 0; j < houseSize; j++)
+                    if (board[i, j] == 0)
+                    {
+                        for (int k = 0; k < houseSize; k++)
+                        {
+                            if (optionsMat[i,j,k] > 0)
+                            {
+                                isNaked++;
+                                temp = k + 1;
+                            }
+
+                        }
+                        if (isNaked == 1)
+                        {
+                            FillCell(board, optionsMat, i, j, temp);
+                            changed = true;
+                        }
+                        isNaked = 0;
+                    }
+            return changed;
+            
+        }
         static int[,] Solve(int[,] board, int[,,] optionsMat)
         {
-            if (IsSolved(board))
-                return board;
             if (first)
             {
                 optionsMat = Scan(board);
+                FillNaked(optionsMat, board);
                 first = false;
             }
-            while (FillNaked(optionsMat,board));
+            while (FillHidden(optionsMat, board) || FillNaked(optionsMat, board));
+            int boardstate = SolveState(optionsMat);// -1 - not solvabel, 0 - solvable but not solved, 1 - solved 
+            if (boardstate == 1)
+            {
+                s = DateTime.Now.Subtract(time);
+                return board;
+            }
+            if (boardstate == -1)// path unsolvable try another option or declare board unsolvable
+                return null;
+            for(int i = 0; i<houseSize; i++)
+                for(int  j = 0; j< houseSize; j++)
+                    if(optionsMat[i,j,houseSize] == 0)
+                    {
+                        int[,] tempBoard = new int[houseSize, houseSize];
+                        int[,,] tempOptions = new int[houseSize, houseSize,houseSize+1];
+                        for (int k = 0; k < houseSize; k++)
+                        {
+                            if (optionsMat[i, j, k] != 0)
+                            {
+                                Array.Copy(board, tempBoard, houseSize * houseSize);
+                                Array.Copy(optionsMat, tempOptions, houseSize * houseSize * (houseSize+1));
+                                FillCell(tempBoard, tempOptions, i, j, k + 1);
+                                try 
+                                {
+                                    tempBoard = Solve(tempBoard, tempOptions);
+                                }
+                                catch
+                                {
+                                    tempBoard = null;
+                                }
+                                if (tempBoard != null)
+                                    return tempBoard;
+                                tempBoard = new int[houseSize, houseSize];
+                            }
+                        }
+                        return null;
+                    }
             return board;
         }
         static void Main(string[] args)
@@ -227,28 +311,10 @@ namespace Sudoku
             string input = Console.ReadLine();
             houseSize = (int)Math.Sqrt(81);
             int[,] board = ToMat(input);
-            PrintBoard(board);
+            PrintBoard(board); 
+            time = DateTime.Now;
             PrintBoard(Solve(board,null));
+            Console.WriteLine($"time to solve:{s.TotalSeconds}s");
         }
     }
 }
-//static void PrintOptionsMat(int[,,] options)
-        //{
-        //    for (int i = 0; i < houseSize; i++)
-        //    {
-        //        if (i % 3 == 0 && i != 0)
-        //            Console.WriteLine("----------------------------");
-        //        for (int j = 0; j < houseSize; j++)
-        //        {
-        //            if (options[i, j, houseSize] > 0)
-        //                Console.Write(options[i, j, houseSize]);
-        //            else
-        //                Console.Write(0);
-        //            if ((j + 1) % 3 == 0 && j != 8)
-        //                Console.Write("|");
-        //            else
-        //                Console.Write(",");
-        //        }
-        //        Console.WriteLine();
-        //    }
-        //}
