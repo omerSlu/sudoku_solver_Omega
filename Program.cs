@@ -400,7 +400,7 @@ namespace Sudoku
                 throw new Exception("invalid board size");
             for(int i = 0; i<houseSize*houseSize; i++)
                 if (!Char.IsDigit(input[i]))
-                    throw new Exception("invalid input, invalid chaacter inputed");
+                    throw new Exception("invalid input, invalid character inputed");
         }
         static void Main(string[] args)
         /*
