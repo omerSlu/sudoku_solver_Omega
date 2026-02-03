@@ -345,6 +345,7 @@ namespace Sudoku
                 try
                 {
                     IsInputValid(input);
+                    Console.WriteLine("hi");
                     int[,] board = ToMat(input);
                     PrintBoard(board);
                     time = DateTime.Now;
