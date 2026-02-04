@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Sudoku.Exceptions;
+using System;
 using static Sudoku.Utilities;
+using static Sudoku.Validations;
 
 namespace Sudoku
 {
@@ -26,8 +28,6 @@ namespace Sudoku
                         square = i / 3 * 3 + j / 3;
                         for (int k = 0; k < HouseSize; k++)
                         {
-                            if (rows[i, k] > 1 || cols[j, k] > 1 || squares[square, k] > 1)
-                                throw new Exception("two or more of the same number in 1 house");
                             if (rows[i, k] == 0 && cols[j, k] == 0 && squares[square, k] == 0)
                             {
                                 amount++;
@@ -38,7 +38,7 @@ namespace Sudoku
                         if (amount > 0)
                             options[i, j, HouseSize] = amount;
                         else
-                            throw new Exception("cell has no potential options");
+                            throw new NoOptionsInCellException("cell has no potential options");
                         amount = 0;
                     }
                     else
@@ -46,6 +46,8 @@ namespace Sudoku
                 }
             }
         }
+        
+
         /* This functions scans the board for the numbers in each row, column and square and then calls
          * the function that turns them into a 3 dimentional array of options like what was described before
          * returns: the optionMat
@@ -72,6 +74,7 @@ namespace Sudoku
                         inCols[i, board[j, i] - 1]++;
                 }
             }
+            CheckIfBoardLegal(inRows, inCols, inSquares);
             TurnIntoOptions(inRows, inCols, inSquares, optionsMat, board);
             return optionsMat;
         }

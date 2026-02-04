@@ -1,6 +1,8 @@
-﻿using System;
-using static Sudoku.Utilities;
+﻿using Sudoku.Exceptions;
+using System;
 using static Sudoku.OptionMat;
+using static Sudoku.Utilities;
+using static Sudoku.Validations;
 
 namespace Sudoku
 {
@@ -65,7 +67,8 @@ namespace Sudoku
         static void FillCell(int[,] board, int[,,] optionsMat, int i, int j, int num)
         {
             if (board[i, j] != 0 && board[i, j] != num)
-                throw new Exception("not solvable two right numbers in same cell");
+                throw new MultipleAnswersToSingleCellException("Two or more answers to a single cell in " +
+                    $"row: {i}, col:{j}");
             board[i, j] = num;
             UpdateOptions(optionsMat, i, j, num);
         }
@@ -241,20 +244,6 @@ namespace Sudoku
                 return board;
             return null;
         } 
-        
-        /* If the inputted string length is not 81, throw exception for not fitting board size.
-         * If the inputted string contains non digits
-         */ 
-        public static void IsInputValid(string input)
-        
-        {
-            for (int i = 0; i < HouseSize * HouseSize; i++)
-                if (!Char.IsDigit(input[i]))
-                    throw new Exception("invalid input, invalid character inputed");
-            if (input.Length != 81)
-                throw new Exception("invalid board size");
-        }
-
          /* The main function. starts a timer to check how much time it took to solve the sudoku
          * if the sudoku is not a legal board a fitting message will be printed and you will be able
          * to enter a new board. if you input the string "exit" the program will stop.
