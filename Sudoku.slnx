@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="../TestsForSudokuProj/TestsForSudokuProj.csproj" Id="79412676-fd53-4242-ace8-3582b6a6a998" />
-  <Project Path="Sudoku.csproj" Id="82a44660-1732-4e4b-a8f9-a7733e91a0db" />
+  <Project Path="Solver/Sudoku.csproj" Id="82a44660-1732-4e4b-a8f9-a7733e91a0db" />
+  <Project Path="TestsForSdusokuSolver/TestsForSdusokuSolver.csproj" Id="92342dfd-1c6a-40b5-825b-01bdb99fc03f" />
 </Solution>
