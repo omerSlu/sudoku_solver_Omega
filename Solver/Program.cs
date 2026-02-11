@@ -23,7 +23,7 @@ namespace Sudoku
             string input = Console.ReadLine();
             int[,] board;
             int[,,] optionsMat;
-            while (input.ToLower() != "exit")
+            while (input == null || input.ToLower() != "exit")
             {
                 try
                 {
@@ -39,12 +39,13 @@ namespace Sudoku
                     EndTime = DateTime.Now.Subtract(StartTime);
                     Console.WriteLine($"\ntime to solve:{DateTime.Now.Subtract(StartTime).TotalSeconds}s");
                 }
-                catch (Exception e) 
+                catch (Exception e)
                 {
-                    Console.WriteLine(e.Message); 
+                    Console.WriteLine(e.Message);
                 }
                 Console.WriteLine("\nEnter a new board: \n Type exit to quit the program");
                 input = Console.ReadLine();
+
             }
         }
     }
