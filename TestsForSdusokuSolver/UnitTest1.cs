@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq.Expressions;
-using static Sudoku.Utilities;
-using static Sudoku.Program;
+﻿using static Sudoku.Utilities;
+using static Sudoku.SolvingAlgorithm;
 using static Sudoku.OptionMat;
+using static Sudoku.Validations;
 
-namespace TestsForSudokuProj
+namespace TestsForSudokuSolver
 {
 
     public class UnitTest1
@@ -20,7 +19,7 @@ namespace TestsForSudokuProj
         [Fact]
         public void Test1()
         {
-            using (StreamReader reader = new StreamReader(@"\TestsForSudokuProj\Boards.txt"))
+            using (StreamReader reader = new StreamReader(@"\Sudoku\TestsForSdusokuSolver\Boards.txt"))
             {
                 string line;
                 DateTime total = DateTime.Now;
@@ -52,7 +51,7 @@ namespace TestsForSudokuProj
             }
             catch (Exception e)
             {
-                if (e.Message != "invalid input, invalid character inputed")
+                if (e.Message != "Invalid character inputed")
                     throw new Exception("did not catch invalid char");
             }
             try
@@ -61,16 +60,16 @@ namespace TestsForSudokuProj
             }
             catch (Exception e)
             {
-                if (e.Message != "invalid board size")
+                if (e.Message != "Not enough charcters (board too small)")
                     throw new Exception("did not catch invalid board size");
             }
             try
             {
                 IsInputValid("0000000000000000000000000000000000000000000000000000000000000000000000000000000000");
             }
-            catch (Exception e)//two or more of the same number in 1 house
+            catch (Exception e)
             {
-                if (e.Message != "invalid board size")
+                if (e.Message != "To many characters (board too large)")
                     throw new Exception("did not catch invalid board size");
             }
             try // two 99's in the same row
@@ -80,28 +79,30 @@ namespace TestsForSudokuProj
             }
             catch (Exception e)
             {
-                if (e.Message != "two or more of the same number in 1 house")
-                    throw new Exception("did not catch illegal board (row)" + e.Message);
+                if (e.Message != "two or more of the same number in 1 row: 0")
+                    throw new Exception("did not catch same number in row" + e.Message);
             }
+
             try // two 99's in the same col
             {
-                int[,] board = ToMat("9000000000900000000000000000000000000000000000000000000000000000000000000000000000");
+                int[,] board = ToMat("900000000000000000000000000900000000000000000000000000000000000000000000000000000");
                 Solve(board, Scan(board));
             }
             catch (Exception e)
             {
-                if (e.Message != "two or more of the same number in 1 house")
-                    throw new Exception("did not catch illegal board  (col)");
+                if (e.Message != "two or more of the same number in 1 column: 0")
+                    throw new Exception("did not catch same number in col " + e.Message);
             }
+
             try // two 99's in the same square
             {
-                int[,] board = ToMat("9000000000090000000000000000000000000000000000000000000000000000000000000000000000");
+                int[,] board = ToMat("9000000000000000000000000090000000000000000000000000000000000000000000000000000000");
                 Solve(board, Scan(board));
             }
             catch (Exception e)
             {
-                if (e.Message != "two or more of the same number in 1 house")
-                    throw new Exception("did not catch illegal board  (square)");
+                if (e.Message != "two or more of the same number in 1 square: 0")
+                    throw new Exception("did not catch illegal board (square)");
             }
         }
     }

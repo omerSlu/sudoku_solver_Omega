@@ -1,9 +1,5 @@
 ﻿using Sudoku.Exceptions;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static Sudoku.Utilities;
 
 namespace Sudoku
@@ -30,9 +26,16 @@ namespace Sudoku
             for (int i = 0; i < HouseSize; i++)
                 for (int k = 0; k < HouseSize; k++)
                 {
-                    if (rows[i, k] > 1 || cols[i, k] > 1 || squares[i, k] > 1)
-                        throw new MultipleAnswersToSingleCellException($"Illegal board, two or more of the" +
-                            $" same number in 1 house (row:{i} or col:{i} or square:{i})");
+                    if (rows[i, k] > 1)
+                        throw new MultipleOccurrencesInHouseException("two or more of the same number in " +
+                            $"1 row: {i}");
+                    else if(cols[i, k] > 1)
+                        throw new MultipleOccurrencesInHouseException("two or more of the same number in " +
+                            $"1 column: {i}");
+                    else if(squares[i, k] > 1)
+                        throw new MultipleOccurrencesInHouseException("two or more of the same number in " +
+                            $"1 square: {i}");
+
                 }
         }
     }

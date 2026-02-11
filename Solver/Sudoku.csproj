@@ -47,16 +47,17 @@
   <ItemGroup>
     <Compile Include="Exceptions\InvalidInputException.cs" />
     <Compile Include="Exceptions\MultipleAnswersToSingleCellException.cs" />
+    <Compile Include="Exceptions\MultipleOccurrencesInHouseException.cs" />
     <Compile Include="Exceptions\NoOptionsInCellException.cs" />
     <Compile Include="OptionMat.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolvingAlgorithm.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Validations.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

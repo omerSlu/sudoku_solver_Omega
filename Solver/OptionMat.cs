@@ -1,10 +1,9 @@
 ﻿using Sudoku.Exceptions;
-using System;
 using static Sudoku.Utilities;
 using static Sudoku.Validations;
 
 namespace Sudoku
-{
+{ // this class can be used to use a new and improved data structure for efficency
     public static class OptionMat
     {
         /* This function takes previously found numbers in each: row, column or square and puts in each cell

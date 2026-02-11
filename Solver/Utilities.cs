@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sudoku
-{
+{// this class can be used for a board object for optimizations later on
     public static class Utilities
     {
         // helper to save starting time of the solving of a sudoku board
